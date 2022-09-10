@@ -136,8 +136,9 @@
         if($.cookie("usrInI")){
             var group = "<%=request.getParameter("group")%>"
             if (group != "null") {
+                var usrInfo = $.cookie("usrInI").split("|")
                 var rq = new XMLHttpRequest();
-                rq.open("GET", "./map_update?d="+$.cookie("usrInI")[2]+"&group="+group+"&name="+$.cookie("usrInI")[0]+"&location="+lat+"^|^"+lon);
+                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon);
                 rq.send()
                 rq.onload = () => {
                     console.log(rq.responseText)

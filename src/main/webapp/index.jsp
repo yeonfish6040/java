@@ -147,9 +147,11 @@
                         e.setMap(null)
                     })
                     result.forEach((e) => {
+                        pos = {lat: parseFloat(e['location'].split("^|^")[0]), lng: parseFloat(e['location'].split("^|^")[1])}
                         usrMk = new google.maps.Marker({
-                            position: {lat: parseInt(e['location'].split("^|^")[0]), lng: parseInt(e['location'].split("^|^")[1])},
+                            position: pos,
                             map: map,
+                            shouldFocus: false,
                         });
                         markers.push(usrMk)
 

@@ -148,13 +148,13 @@
                     })
                     result.forEach((e) => {
                         usrMk = new google.maps.Marker({
-                            position: {lat: e['location'].split("^|^")[0], lng: e['location'].split("^|^")[1]},
+                            position: {lat: parseInt(e['location'].split("^|^")[0]), lng: parseInt(e['location'].split("^|^")[1])},
                             map: map,
                         });
                         markers.push(usrMk)
 
                         iWindows.forEach((e) => {
-                            e.open(null)
+                            e.open({anchor: null, null})
                         })
                         usrIW = new google.maps.InfoWindow({
                             content: e['name']

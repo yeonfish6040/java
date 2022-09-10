@@ -157,7 +157,7 @@
                             e.open(null)
                         })
                         usrIW = new google.maps.InfoWindow({
-                            content: info[0]
+                            content: e['name']
                         });
                         usrIW.open({
                             anchor: usrMk,

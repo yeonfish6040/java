@@ -28,18 +28,14 @@ public class mapUpdate extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        String[][] data = {
-                {"last_update", "id", "name", "location", "group"},
-                {String.valueOf(Instant.now().getEpochSecond()), request.getParameter("id"), request.getParameter("name"), request.getParameter("location"), request.getParameter("group")}
-        };
         try {
-            sq.insert("locations", data);
+            sq.query("insert into locations(`last_update`, `id`, `name`, `location`, `group`) values('"+String.valueOf(Instant.now().getEpochSecond())+"', '"+request.getParameter("id")+"', '"+request.getParameter("name")+"', '"+request.getParameter("location")+"', '"+request.getParameter("group")+"')");
         } catch (Exception e) {
             e.printStackTrace();
         }
         sqlResults results;
         try {
-            results = sq.query("select * from locations where id not like "+request.getParameter("id")+" and group like "+request.getParameter("group"));
+            results = sq.query("select * from locations where id not like \""+request.getParameter("id")+"\" and `group` like \""+request.getParameter("group")+"\"");
         } catch (Exception e) {
             e.printStackTrace();
             results = null;

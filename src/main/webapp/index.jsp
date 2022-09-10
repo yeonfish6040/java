@@ -141,7 +141,30 @@
                 rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon);
                 rq.send()
                 rq.onload = () => {
-                    console.log(rq.responseText)
+                    result = JSON.parse(rq.responseText)
+                    markers.forEach((e) => {
+                        e.setMap(null)
+                    })
+                    result.forEach((e) => {
+                        usrMk = new google.maps.Marker({
+                            position: {lat: e['location'].split("^|^")[0], lng: e['location'].split("^|^")[1]},
+                            map: map,
+                        });
+                        markers.push(usrMk)
+
+                        iWindows.forEach((e) => {
+                            e.open(null)
+                        })
+                        usrIW = new google.maps.InfoWindow({
+                            content: info[0]
+                        });
+                        usrIW.open({
+                            anchor: usrMk,
+                            map,
+                            shouldFocus: false,
+                        });
+                        iWindows.push(usrIW)
+                    })
                 }
             }
         }

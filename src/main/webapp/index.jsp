@@ -153,9 +153,6 @@
                         });
                         markers.push(usrMk)
 
-                        iWindows.forEach((e) => {
-                            e.open({anchor: null, null})
-                        })
                         usrIW = new google.maps.InfoWindow({
                             content: e['name']
                         });
@@ -164,7 +161,6 @@
                             map,
                             shouldFocus: false,
                         });
-                        iWindows.push(usrIW)
                     })
                 }
             }

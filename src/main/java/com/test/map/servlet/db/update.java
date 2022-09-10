@@ -1,18 +1,18 @@
 package com.test.map.servlet.db;
 
-import com.test.map.util.sql.*;
+import com.test.map.util.sql.sqlQuery;
+import com.test.map.util.sql.sqlResults;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Instant;
 
-@WebServlet(name = "mapUpdate", value = "/map_update")
-public class mapUpdate extends HttpServlet {
+@WebServlet(name = "update", value = "/update")
+public class update extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         PrintWriter out = response.getWriter();

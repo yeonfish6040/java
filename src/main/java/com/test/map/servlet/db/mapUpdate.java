@@ -24,7 +24,7 @@ public class mapUpdate extends HttpServlet {
             System.out.println("DB connection error");
         }
         try {
-            sq.query("delete from locations where location+600 < "+String.valueOf(Instant.now().getEpochSecond())+" or id like "+request.getParameter("id"));
+            sq.query("delete from locations where last_update+600 < "+String.valueOf(Instant.now().getEpochSecond())+" or id like "+request.getParameter("id"));
         } catch (Exception e) {
             e.printStackTrace();
         }

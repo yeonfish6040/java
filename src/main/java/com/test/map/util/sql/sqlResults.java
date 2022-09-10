@@ -140,7 +140,7 @@ public class sqlResults {
 		for (int i=1;i<data.length;i++) {
 			JSONResult.append("{");
 			for (int j=0;j<data[0].length;j++) {
-				JSONResult.append(data[0][j]+":"+data[i][j]);
+				JSONResult.append("\""+data[0][j]+"\":\""+data[i][j]+"\"");
 				if (data[0].length-1 != j) {
 					JSONResult.append(",");
 				}

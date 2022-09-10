@@ -141,6 +141,7 @@
                 rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon);
                 rq.send()
                 rq.onload = () => {
+                    // console.log(rq.responseText)
                     result = JSON.parse(rq.responseText)
                     markers.forEach((e) => {
                         e.setMap(null)

@@ -120,68 +120,107 @@
         if(watching) {
             // set watch status
             watching = false
+            // if it's intervaling, clearIt
             if (updateOtherI) {
                 clearInterval(updateOtherI)
             }
+            // stop watching moving
             if (watch) {
                 navigator.geolocation.clearWatch(watcher)
             }else{
+                // if it's intervaling, clear it
                 clearInterval(watcher)
             }
+            // set btn disabled
             document.getElementById("updateBtn").style.color = "black"
         }else {
+            // set watch status
             watching = true
+            // set interval for update other people's position and upload my status function updateOther
             updateOtherI = setInterval(updateOther, 500)
             if (watch) {
+                // starting watch moving
                 watcher = navigator.geolocation.watchPosition(updateMy, error, {enableHighAccuracy: true})
             }else{
+                // set interval getting cur position
                 watcher = setInterval(() => navigator.geolocation.getCurrentPosition(updateMy, error, {enableHighAccuracy: true}), 500);
             }
+            // set btn enabled
             document.getElementById("updateBtn").style.color = "skyblue"
         }
     }
 
     // swich updating mode. I(nterval)U(pdating) and D(etect)M(oving)
     function switchWatch() {
+        // stop updating~
         if(watching) {
             toggleUpdate()
         }
         if (watch) {
+            // set mode
             watch = false
+            // change btn showing
             document.getElementById("watchBtn").innerHTML = "IU"
         }else {
+            // set mode
             watch = true
+            // change btn showing
             document.getElementById("watchBtn").innerHTML = "DM"
         }
+        // restart updating
         toggleUpdate()
     }
 
+    // toggle auto pan to marker
     function toggleTrack() {
         if (track) {
+            // set mode
             track = false
+            // set btn disabled
             document.getElementById("trackBtn").style.color = "black"
         }else {
+            // set mode
             track = true
+            // set btn enabled
             document.getElementById("trackBtn").style.color = "skyblue"
         }
     }
 
+    // update other user's position and upload my status
     function updateOther() {
+        // check user logined
         if($.cookie("usrInI")) {
+            // get param 'group'
             var group = "<%=request.getParameter("group")%>"
+            // if group isn't null
             if (group != "null") {
+                // get user info array from cookie
                 var usrInfo = $.cookie("usrInI").split("|")
+                // start ajax
                 var rq = new XMLHttpRequest();
+                // send name, id, location, heading, speed, group
                 rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon+"&heading="+heading+"&speed="+speeds);
+                // send
                 rq.send()
+                // on ajax action finished
                 rq.onload = () => {
+                    // debug only~~
                     // console.log(rq.responseText)
+
+                    // parsing json string
                     result = JSON.parse(rq.responseText)
+
+                    // delete old marker
                     markers.forEach((e) => {
                         e.setMap(null)
                     })
+
+                    // make new marker
                     result.forEach((e) => {
+                        // simplize (?)
                         pos = {lat: parseFloat(e['location'].split("^|^")[0]), lng: parseFloat(e['location'].split("^|^")[1])}
+
+                        // set marker img. filled with blue. my marker is filled with red
                         const svgMarker = {
                             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                             fillOpacity: 0.6,
@@ -190,6 +229,8 @@
                             scale: 5,
                             fillColor: "blue",
                         };
+
+                        // set marker
                         usrMk = new google.maps.Marker({
                             position: pos,
                             map: map,
@@ -197,12 +238,17 @@
                             shouldFocus: false,
                             disableAutoPan: true,
                         });
+
+                        // add marker to array
                         markers.push(usrMk)
 
+                        // init info window
                         usrIW = new google.maps.InfoWindow({
                             content: e['name']+" | "+e['speed']+"km/h",
                             disableAutoPan: true,
                         });
+
+                        // open info window. for marker
                         usrIW.open({
                             anchor: usrMk,
                             map,
@@ -214,26 +260,36 @@
         }
     }
 
+    // update my status. ex) marker, speed, info window and heading
     function updateMy(pos) {
+        // simplize 2222
         crd = pos.coords
         lat = crd.latitude
         lon = crd.longitude
         acc = crd.accuracy
         speed = crd.speed
         curPos = {lat: lat, lng: lon}
+        // move marker to cur pos
         curPosMk.setPosition(curPos)
+        // rotating marker...
         var icon = curPosMk.getIcon();
         icon.rotation = heading;
-        curPosMk.setIcon(icon);
+        curPosMk.setIcon(icon)
+        // move accuracy circle to cur pos
         circle.setCenter(curPos)
+        // update global acc variable for accuracy circle
         accAl = acc
+
+        // update my info window
         content = getSpeed(pos)+" km/h";
         if ($.cookie("usrInI")) {
             myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
         }
     }
 
+    // accuracy circle animating
     function circleChange() {
+        // if accuracy circle is animating now, aborting..
         if (isChanging) {
             return
         }

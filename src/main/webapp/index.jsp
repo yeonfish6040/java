@@ -32,6 +32,7 @@
     var speeds
     var heading
     var myIW
+    var updateOtherI
     var accAl = 0
     var radius = 0
     var watching = false
@@ -98,6 +99,9 @@
     function toggleUpdate() {
         if(watching) {
             watching = false
+            if (updateOtherI) {
+                clearInterval(updateOtherI)
+            }
             if (watch) {
                 navigator.geolocation.clearWatch(watcher)
             }else{
@@ -106,6 +110,7 @@
             document.getElementById("updateBtn").style.color = "black"
         }else {
             watching = true
+            updateOtherI = setInterval(updateOther, 500)
             if (watch) {
                 watcher = navigator.geolocation.watchPosition(update, error, {enableHighAccuracy: true})
             }else{
@@ -139,26 +144,8 @@
         }
     }
 
-    function update(pos) {
-        crd = pos.coords
-        lat = crd.latitude
-        lon = crd.longitude
-        acc = crd.accuracy
-        speed = crd.speed
-        curPosMk.setPosition({lat: lat, lng: lon})
-        var icon = curPosMk.getIcon();
-        icon.rotation = heading;
-        curPosMk.setIcon(icon);
-        circle.setCenter({lat: lat, lng: lon})
-        accAl = acc
-        content = getSpeed(pos)+" km/h";
-        $('#myInfo').html(content)
-        if (track) {
-            map.panTo({lat: lat, lng: lon});
-        }
-        if($.cookie("usrInI")){
-            myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
-
+    function updateOther() {
+        if($.cookie("usrInI")) {
             var group = "<%=request.getParameter("group")%>"
             if (group != "null") {
                 var usrInfo = $.cookie("usrInI").split("|")
@@ -202,6 +189,28 @@
                     })
                 }
             }
+        }
+    }
+
+    function update(pos) {
+        crd = pos.coords
+        lat = crd.latitude
+        lon = crd.longitude
+        acc = crd.accuracy
+        speed = crd.speed
+        curPosMk.setPosition({lat: lat, lng: lon})
+        var icon = curPosMk.getIcon();
+        icon.rotation = heading;
+        curPosMk.setIcon(icon);
+        circle.setCenter({lat: lat, lng: lon})
+        accAl = acc
+        content = getSpeed(pos)+" km/h";
+        $('#myInfo').html(content)
+        if (track) {
+            map.panTo({lat: lat, lng: lon});
+        }
+        if ($.cookie("usrInI")) {
+            myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
         }
     }
 

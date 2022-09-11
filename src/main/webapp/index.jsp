@@ -10,21 +10,25 @@
     <script src="./src/jquery.cookie.js"></script>
 </head>
 <body>
+<!-- speed -->
 <h3><span id="myInfo" style="position: absolute; top: 10vh; font-size: 1.5em;"></span></h3>
+<!-- google login function -->
 <span id="loginArea"><span data-client_id='549662034486-gsi7aqabhmdrp5a0b09dtmi6g9hjl8b0.apps.googleusercontent.com' data-callback='onSignIn' id='g_id_onload'></span></span>
+<!-- update type or toggle btns -->
 <button style="position: absolute; bottom: 15vh;width: 4vh; height: 4vh;" id="updateBtn" onclick="toggleUpdate()">RE</button>
 <button style="position: absolute; bottom: 10vh;width: 4vh; height: 4vh;" id="watchBtn" onclick="switchWatch()">DM</button>
 <button style="position: absolute; bottom: 5vh;width: 4vh; height: 4vh;" id="trackBtn" onclick="toggleTrack()">⊙</button>
 <div id="map" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;z-index: -1;"></div>
 </body>
 <script>
+    // if already logined, disable login prompt
     if($.cookie("usrInI"))
         document.getElementById("loginArea").innerHTML = ""
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAqOsjFu-Up_Q5VAvMJmzCGFPHiLFA3AzI&callback=initMap"></script>
 <script src='https://accounts.google.com/gsi/client' async defer ></script>
 <script>
-    interval = null
+    // define global variables
     var map
     var curPosMk
     var circle
@@ -33,8 +37,10 @@
     var heading
     var myIW
     var updateOtherI
+    var curPos
     var accAl = 0
     var radius = 0
+    var interval = null
     var watching = false
     var track = false
     var isChanging = false
@@ -43,26 +49,29 @@
     var iWindows = []
     var usrInfo = []
 
-    if ($.cookie("usrInI")) {
-        $('#loginBtn').hide();
-    }
-
+    // init application
     function init() {
+
+        // add eventlistener which detect divice heading change
         if (checkMobile() == "ios") {
             window.addEventListener('deviceorientation', manageCompass)
         } else if (checkMobile() == "android") {
             window.addEventListener("deviceorientationabsolute", manageCompass, true);
         }
 
+        // get first position
         navigator.geolocation.getCurrentPosition((pos) => {
             crd = pos.coords;
             lat = crd.latitude
             lon = crd.longitude
 
+            // define map
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 18,
                 center: {lat: lat, lng: lon},
             });
+
+            // set marker img
             const svgMarker = {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                 fillOpacity: 0.6,
@@ -71,12 +80,16 @@
                 scale: 5,
                 fillColor: "red",
             };
+
+            // define main marker
             curPosMk = new google.maps.Marker({
                 position: {lat: lat, lng: lon},
                 icon: svgMarker,
                 map: map,
                 disableAutoPan: true
             });
+
+            // define accuracy range circle (animated) function circleChange
             circle = new google.maps.Circle({
                 strokeColor: "#0000FF",
                 strokeOpacity: 0.8,
@@ -87,17 +100,25 @@
                 radius: 0,
                 disableAutoPan: true,
             });
-            console.log($.cookie("usrInI"));
 
+            // used to debugging... (I don't want to delete this)
+            // console.log($.cookie("usrInI"));
+
+            // init user's info window function initMyIW
             if($.cookie("usrInI")) {
-                initMyIW({lat: lat, lng: lon})
+                initMyIW()
             }
         }, error, {timeout: 10000, enableHighAccuracy: true})
+        // start updating
         toggleUpdate();
+        // start animating accuracy circle
         setInterval(() => circleChange(), 5000);
     }
+
+    // toggle updating pos. including function updateOther and updateMy
     function toggleUpdate() {
         if(watching) {
+            // set watch status
             watching = false
             if (updateOtherI) {
                 clearInterval(updateOtherI)
@@ -112,14 +133,15 @@
             watching = true
             updateOtherI = setInterval(updateOther, 500)
             if (watch) {
-                watcher = navigator.geolocation.watchPosition(update, error, {enableHighAccuracy: true})
+                watcher = navigator.geolocation.watchPosition(updateMy, error, {enableHighAccuracy: true})
             }else{
-                watcher = setInterval(() => navigator.geolocation.getCurrentPosition(update, error, {enableHighAccuracy: true}), 500);
+                watcher = setInterval(() => navigator.geolocation.getCurrentPosition(updateMy, error, {enableHighAccuracy: true}), 500);
             }
             document.getElementById("updateBtn").style.color = "skyblue"
         }
     }
 
+    // swich updating mode. I(nterval)U(pdating) and D(etect)M(oving)
     function switchWatch() {
         if(watching) {
             toggleUpdate()
@@ -192,23 +214,20 @@
         }
     }
 
-    function update(pos) {
+    function updateMy(pos) {
         crd = pos.coords
         lat = crd.latitude
         lon = crd.longitude
         acc = crd.accuracy
         speed = crd.speed
-        curPosMk.setPosition({lat: lat, lng: lon})
+        curPos = {lat: lat, lng: lon}
+        curPosMk.setPosition(curPos)
         var icon = curPosMk.getIcon();
         icon.rotation = heading;
         curPosMk.setIcon(icon);
-        circle.setCenter({lat: lat, lng: lon})
+        circle.setCenter(curPos)
         accAl = acc
         content = getSpeed(pos)+" km/h";
-        $('#myInfo').html(content)
-        if (track) {
-            map.panTo({lat: lat, lng: lon});
-        }
         if ($.cookie("usrInI")) {
             myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
         }
@@ -220,7 +239,7 @@
         }
         isChanging = true
         var circleInterval;
-        var nowAcc = accAl*1
+        var nowAcc = accAl
         if(nowAcc <= 1) return
         var splitedAcc = nowAcc/10
         function less() {
@@ -251,7 +270,7 @@
 
     }
 
-    function initMyIW(pos) {
+    function initMyIW() {
         var info = $.cookie('usrInI').split("|");
         myIW= new google.maps.InfoWindow({
             content: info[0]+" | "+speeds+" km/h",

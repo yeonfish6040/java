@@ -1,4 +1,3 @@
-<%@ page import="org.apache.tomcat.jdbc.pool.interceptor.SlowQueryReport"%>
 <%@ page import="java.net.InetAddress" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
@@ -30,6 +29,9 @@
     var curPosMk
     var circle
     var watcher
+    var speeds
+    var heading
+    var myIW
     var accAl = 0
     var radius = 0
     var watching = false
@@ -40,8 +42,17 @@
     var iWindows = []
     var usrInfo = []
 
-    function init() {
+    if ($.cookie("usrInI")) {
         $('#loginBtn').hide();
+    }
+
+    function init() {
+        if (checkMobile() == "ios") {
+            window.addEventListener('deviceorientation', manageCompass)
+        } else if (checkMobile() == "android") {
+            window.addEventListener("deviceorientationabsolute", manageCompass, true);
+        }
+
         navigator.geolocation.getCurrentPosition((pos) => {
             crd = pos.coords;
             lat = crd.latitude
@@ -51,9 +62,19 @@
                 zoom: 18,
                 center: {lat: lat, lng: lon},
             });
+            const svgMarker = {
+                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                fillOpacity: 0.6,
+                strokeWeight: 0,
+                rotation: heading,
+                scale: 5,
+                fillColor: "red",
+            };
             curPosMk = new google.maps.Marker({
                 position: {lat: lat, lng: lon},
+                icon: svgMarker,
                 map: map,
+                disableAutoPan: true
             });
             circle = new google.maps.Circle({
                 strokeColor: "#0000FF",
@@ -63,6 +84,7 @@
                 map,
                 center: {lat: lat, lng: lon},
                 radius: 0,
+                disableAutoPan: true,
             });
             console.log($.cookie("usrInI"));
 
@@ -124,21 +146,24 @@
         acc = crd.accuracy
         speed = crd.speed
         curPosMk.setPosition({lat: lat, lng: lon})
+        var icon = curPosMk.getIcon();
+        icon.rotation = heading;
+        curPosMk.setIcon(icon);
         circle.setCenter({lat: lat, lng: lon})
         accAl = acc
-        if(isMobileDevice()) {
-            content = speed.toFixed(2)+" km/h<br>± "+acc.toFixed(2)+"m";
-            $('#myInfo').html(content)
-        }
+        content = getSpeed(pos)+" km/h";
+        $('#myInfo').html(content)
         if (track) {
             map.panTo({lat: lat, lng: lon});
         }
         if($.cookie("usrInI")){
+            myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
+
             var group = "<%=request.getParameter("group")%>"
             if (group != "null") {
                 var usrInfo = $.cookie("usrInI").split("|")
                 var rq = new XMLHttpRequest();
-                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon);
+                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon+"&heading="+heading+"&speed="+speeds);
                 rq.send()
                 rq.onload = () => {
                     // console.log(rq.responseText)
@@ -148,15 +173,26 @@
                     })
                     result.forEach((e) => {
                         pos = {lat: parseFloat(e['location'].split("^|^")[0]), lng: parseFloat(e['location'].split("^|^")[1])}
+                        const svgMarker = {
+                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            fillOpacity: 0.6,
+                            strokeWeight: 0,
+                            rotation: parseInt(e['heading']),
+                            scale: 5,
+                            fillColor: "blue",
+                        };
                         usrMk = new google.maps.Marker({
                             position: pos,
                             map: map,
+                            icon: svgMarker,
                             shouldFocus: false,
+                            disableAutoPan: true,
                         });
                         markers.push(usrMk)
 
                         usrIW = new google.maps.InfoWindow({
-                            content: e['name']
+                            content: e['name']+" | "+e['speed']+"km/h",
+                            disableAutoPan: true,
                         });
                         usrIW.open({
                             anchor: usrMk,
@@ -208,25 +244,73 @@
 
     function initMyIW(pos) {
         var info = $.cookie('usrInI').split("|");
-        const infowindow = new google.maps.InfoWindow({
-            content: info[0]
+        myIW= new google.maps.InfoWindow({
+            content: info[0]+" | "+speeds+" km/h",
+            disableAutoPan: true
         });
-        infowindow.open({
+        myIW.open({
             anchor: curPosMk,
             map,
             shouldFocus: false,
         });
     }
 
+    function manageCompass(event) {
+        if (event.webkitCompassHeading) {
+            absoluteHeading = event.webkitCompassHeading + 180;
+        } else {
+            absoluteHeading = 360 - event.alpha;
+        }
+        heading = absoluteHeading
+    }
+
+    function calculateSpeed(t1, lat1, lon1, t2, lat2, lon2) {
+        var R = 6371; // Radius of the earth in km
+        var dLat = deg2rad(lat2-lat1);  // deg2rad below
+        var dLon = deg2rad(lon2-lon1);
+        var a =
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2)
+        ;
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        var d = R * c; // Distance in km
+        return ((d/((t2-t1)/1000))*60*60).toFixed(2);
+    }
+
+    function deg2rad(deg) {
+        return deg * (Math.PI/180)
+    }
+
+    function getSpeed(position1) {
+        var t1 = Date.now();
+        navigator.geolocation.getCurrentPosition((position2) => {
+            var speedTemp = calculateSpeed(t1, position1.coords.latitude, position1.coords.longitude, Date.now(), position2.coords.latitude, position2.coords.longitude);
+            setSpeed(speedTemp)
+        }, error, {enableHighAccuracy: true})
+        return speeds
+    }
+
+    function setSpeed(speed) {
+        speeds = speed;
+    }
+
     function error(e) {
         console.log(e);
     }
 
-    function isMobileDevice() {
-        var check = false;
-        (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
-        return check;
+    function checkMobile(){
+        var varUA = navigator.userAgent.toLowerCase();
+        if ( varUA.indexOf('android') > -1) {
+            return "android";
+        } else if ( varUA.indexOf("iphone") > -1||varUA.indexOf("ipad") > -1||varUA.indexOf("ipod") > -1 ) {
+            return "ios";
+        } else {
+            return "other";
+        }
+
     }
+
 
     window.initMap = init
 </script>

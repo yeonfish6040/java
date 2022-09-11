@@ -29,7 +29,7 @@ public class mapUpdate extends HttpServlet {
             e.printStackTrace();
         }
         try {
-            sq.query("insert into locations(`last_update`, `id`, `name`, `location`, `group`) values('"+String.valueOf(Instant.now().getEpochSecond())+"', '"+request.getParameter("id")+"', '"+request.getParameter("name")+"', '"+request.getParameter("location")+"', '"+request.getParameter("group")+"')");
+            sq.query("insert into locations(`last_update`, `id`, `name`, `location`, `group`, `heading`, `speed`) values('"+String.valueOf(Instant.now().getEpochSecond())+"', '"+request.getParameter("id")+"', '"+request.getParameter("name")+"', '"+request.getParameter("location")+"', '"+request.getParameter("group")+"', '"+request.getParameter("heading")+"', '"+request.getParameter("speed")+"')");
         } catch (Exception e) {
             e.printStackTrace();
         }

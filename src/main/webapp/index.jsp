@@ -41,6 +41,7 @@
     let gLat
     let gLon
     let focus
+    let connecterLine
     let accAl = 0
     let radius = 0
     let interval = null
@@ -54,19 +55,14 @@
 
     // init application
     function init() {
-
-        // add eventlistener which detect divice heading change
-        if (checkMobile() === "ios") {
-            window.addEventListener('deviceorientation', manageCompass)
-        } else if (checkMobile() === "android") {
-            window.addEventListener("deviceorientationabsolute", manageCompass, true);
-        }
-
         // get first position
         navigator.geolocation.getCurrentPosition((pos) => {
             let crd = pos.coords;
             let lat = crd.latitude
             let lon = crd.longitude
+
+            // set heading
+            heading = crd.heading
 
             // define map
             map = new google.maps.Map(document.getElementById("map"), {
@@ -237,20 +233,24 @@
                         // if marker focused, get distence and show it
                         if (focus === e['id']) {
                             // get distence
-                            let dist = getDist(gLat, gLon, pos['lat'], pos['lon']);
+                            let dist = getDist(gLat, gLon, pos['lat'], pos['lng']);
+                            contentIw = e['name']+" | "+e['speed']+"km/h<br>distence: "+dist.toFixed(3)+" km"
                             const myPosToMk = [
                                 {lat: gLat, lng: gLon},
                                 pos
                             ];
-                            const connecter = new google.maps.Polyline({
-                                path: myPosToMk,
-                                geodesic: true,
-                                strokeColor: "#FF0000",
-                                strokeOpacity: 1.0,
-                                strokeWeight: 2,
-                            });
-                            connecter.setMap(map)
-                            contentIw = e['name']+" | "+e['speed']+"km/h<br>distence: "+dist
+                            if (connecterLine) {
+                                connecterLine.setPath(myPosToMk)
+                            }else {
+                                connecterLine = new google.maps.Polyline({
+                                    path: myPosToMk,
+                                    geodesic: true,
+                                    strokeColor: "#FF0000",
+                                    strokeOpacity: 1.0,
+                                    strokeWeight: 2,
+                                });
+                            }
+                            connecterLine.setMap(map)
                         }
 
                         // set marker img. filled with blue. my marker is filled with red
@@ -271,12 +271,7 @@
                             shouldFocus: false,
                             disableAutoPan: true,
                         });
-                        // put id into usrMk
-                        usrMk.usrId = e['id']
-                        usrMk.addListener("click", () => {
-                            // when click, set focus to usrId
-                            focus = usrMk.usrId
-                        })
+
                         // add marker to array
                         markers.push(usrMk)
 
@@ -292,6 +287,13 @@
                             map,
                             shouldFocus: false,
                         });
+
+                        // put id into usrMk
+                        usrMk.usrId = e['id']
+                        usrMk.addListener("click", () => {
+                            // when click, set focus to usrId
+                            focus = usrMk.usrId
+                        })
                     })
                 }
             }
@@ -305,6 +307,9 @@
         let lat = crd.latitude
         let lon = crd.longitude
         let acc = crd.accuracy
+
+        heading = crd.heading
+
         gLat = lat
         gLon = lon
         curPos = {lat: lat, lng: lon}
@@ -324,6 +329,9 @@
         // update my info window
         if ($.cookie("usrInI")) {
             myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
+        }
+        if (track) {
+            map.panTo({lat: lat, lng: lon})
         }
     }
 
@@ -403,20 +411,6 @@
             map,
             shouldFocus: false,
         });
-    }
-
-    // get and set heading
-    function manageCompass(event) {
-        if (event.webkitCompassHeading) {
-            // if ios
-            absoluteHeading = event.webkitCompassHeading + 360;
-        } else {
-            // other
-            absoluteHeading = 360 - event.alpha;
-        }
-        // output
-        heading = absoluteHeading
-        return heading
     }
 
     // calculate distence

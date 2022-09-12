@@ -37,6 +37,8 @@
     let myIW
     let updateOtherI
     let curPos
+    let gLat
+    let gLon
     let accAl = 0
     let radius = 0
     let interval = null
@@ -73,7 +75,7 @@
             // set marker img
             const svgMarker = {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                fillOpacity: 0.6,
+                fillOpacity: 0.2,
                 strokeWeight: 0,
                 rotation: heading,
                 scale: 5,
@@ -198,7 +200,7 @@
                 // start ajax
                 var rq = new XMLHttpRequest();
                 // send name, id, location, heading, speed, group
-                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+lat+"^|^"+lon+"&heading="+heading+"&speed="+speeds);
+                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+gLat+"^|^"+gLon+"&heading="+heading+"&speed="+speeds);
                 // send
                 rq.send()
                 // on ajax action finished
@@ -262,11 +264,12 @@
     // update my status. ex) marker, speed, info window and heading
     function updateMy(pos) {
         // simplize 2222
-        crd = pos.coords
-        lat = crd.latitude
-        lon = crd.longitude
-        acc = crd.accuracy
-        speed = crd.speed
+        let crd = pos.coords
+        let lat = crd.latitude
+        let lon = crd.longitude
+        let acc = crd.accuracy
+        gLat = lat
+        gLon = lon
         curPos = {lat: lat, lng: lon}
         // move marker to cur pos
         curPosMk.setPosition(curPos)
@@ -278,7 +281,6 @@
         circle.setCenter(curPos)
         // update global acc variable for accuracy circle
         accAl = acc
-
         // update my info window
         content = getSpeed(pos)+" km/h";
         if ($.cookie("usrInI")) {

@@ -1,5 +1,4 @@
-<%@ page import="java.net.InetAddress" %>
-<%@ page language="java" contentType="text/html; charset=UTF-8"
+<%@ page contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -29,41 +28,41 @@
 <script src='https://accounts.google.com/gsi/client' async defer ></script>
 <script>
     // define global variables
-    var map
-    var curPosMk
-    var circle
-    var watcher
-    var speeds
-    var heading
-    var myIW
-    var updateOtherI
-    var curPos
-    var accAl = 0
-    var radius = 0
-    var interval = null
-    var watching = false
-    var track = false
-    var isChanging = false
-    var watch = true
-    var markers = []
-    var iWindows = []
-    var usrInfo = []
+    let map
+    let curPosMk
+    let circle
+    let watcher
+    let speeds
+    let heading
+    let myIW
+    let updateOtherI
+    let curPos
+    let accAl = 0
+    let radius = 0
+    let interval = null
+    let watching = false
+    let track = false
+    let isChanging = false
+    let watch = true
+    let markers = []
+    let iWindows = []
+    let usrInfo = []
 
     // init application
     function init() {
 
         // add eventlistener which detect divice heading change
-        if (checkMobile() == "ios") {
+        if (checkMobile() === "ios") {
             window.addEventListener('deviceorientation', manageCompass)
-        } else if (checkMobile() == "android") {
+        } else if (checkMobile() === "android") {
             window.addEventListener("deviceorientationabsolute", manageCompass, true);
         }
 
         // get first position
         navigator.geolocation.getCurrentPosition((pos) => {
-            crd = pos.coords;
-            lat = crd.latitude
-            lon = crd.longitude
+            let crd = pos.coords;
+            let lat = crd.latitude
+            let lon = crd.longitude
 
             // define map
             map = new google.maps.Map(document.getElementById("map"), {
@@ -191,9 +190,9 @@
         // check user logined
         if($.cookie("usrInI")) {
             // get param 'group'
-            var group = "<%=request.getParameter("group")%>"
+            let group = "<%=request.getParameter("group")%>"
             // if group isn't null
-            if (group != "null") {
+            if (group !== "null") {
                 // get user info array from cookie
                 var usrInfo = $.cookie("usrInI").split("|")
                 // start ajax
@@ -293,45 +292,71 @@
         if (isChanging) {
             return
         }
+        // set status - running
         isChanging = true
+        // define variable
         var circleInterval;
+        // get accuracy
         var nowAcc = accAl
+        // abort if accuracy is not valid
         if(nowAcc <= 1) return
+        // split accuracy
         var splitedAcc = nowAcc/10
+        // decreasing animation (after increasing)
         function less() {
+            // reset
             circle.setRadius(0)
+            // start animation
             circleInterval = setInterval(() => {
+                // decrease
                 radius -= splitedAcc
-                if(radius <= 0) {clearInterval(circleInterval);}
                 circle.setRadius(radius)
+                // if finish, exit
+                if(radius <= 0) return clearInterval(circleInterval);
             }, 100);
         }
+        // increasing animation
         circleInterval = setInterval(() => {
+            // increase
             radius += splitedAcc
-            if(radius >= nowAcc) {clearInterval(circleInterval);less()}
             circle.setRadius(radius)
+            // if finish, call function less() and exit
+            if(radius >= nowAcc) {clearInterval(circleInterval); return less()}
         }, 100);
+        // set status - stopped
         isChanging = false
     }
 
+    // on user login
     function onSignIn(res) {
+        // start ajax
         rq = new XMLHttpRequest();
+        // send token and client id to node js api server. (used to get user info)
         rq.open("GET", "https://lyj.kr:6040/?cre="+res.credential+"&cid="+res.clientId)
+        // execute
         rq.send()
+        // on finish
         rq.onload = () => {
+            // parsing json string
             re = JSON.parse(rq.responseText)
+            // set cookie
             $.cookie('usrInI', (re['name']+"|"+re['picture']+"|"+re['sub']+"|"+re['email_verified']), { expires: 7 });
+            // init info window function initMyIW
             initMyIW()
         }
 
     }
 
+    // set info window for me
     function initMyIW() {
+        // get info from cookie
         var info = $.cookie('usrInI').split("|");
+        // define info window
         myIW= new google.maps.InfoWindow({
             content: info[0]+" | "+speeds+" km/h",
             disableAutoPan: true
         });
+        // open info window
         myIW.open({
             anchor: curPosMk,
             map,
@@ -339,18 +364,25 @@
         });
     }
 
+    // get and set heading
     function manageCompass(event) {
         if (event.webkitCompassHeading) {
-            absoluteHeading = event.webkitCompassHeading + 180;
+            // if ios
+            absoluteHeading = event.webkitCompassHeading + 360;
         } else {
+            // other
             absoluteHeading = 360 - event.alpha;
         }
+        // output
         heading = absoluteHeading
+        return heading
     }
 
+    // calculate speed by times and locations
     function calculateSpeed(t1, lat1, lon1, t2, lat2, lon2) {
-        var R = 6371; // Radius of the earth in km
-        var dLat = deg2rad(lat2-lat1);  // deg2rad below
+        // ???
+        var R = 6371;
+        var dLat = deg2rad(lat2-lat1);
         var dLon = deg2rad(lon2-lon1);
         var a =
             Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -362,6 +394,7 @@
         return ((d/((t2-t1)/1000))*60*60).toFixed(2);
     }
 
+    // ???
     function deg2rad(deg) {
         return deg * (Math.PI/180)
     }
@@ -375,14 +408,17 @@
         return speeds
     }
 
+    // set spped to global variable
     function setSpeed(speed) {
         speeds = speed;
     }
 
+    // error handler
     function error(e) {
         console.log(e);
     }
 
+    // check mobile type
     function checkMobile(){
         var varUA = navigator.userAgent.toLowerCase();
         if ( varUA.indexOf('android') > -1) {
@@ -395,7 +431,7 @@
 
     }
 
-
+    // start
     window.initMap = init
 </script>
 </html>

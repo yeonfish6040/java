@@ -1,3 +1,4 @@
+<!-- Running on https://lyj.kr/map -->
 <%@ page contentType="text/html; charset=UTF-8"
          pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -75,7 +76,7 @@
             // set marker img
             const svgMarker = {
                 path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                fillOpacity: 0.2,
+                fillOpacity: 0.6,
                 strokeWeight: 0,
                 rotation: heading,
                 scale: 5,
@@ -182,6 +183,15 @@
         }else {
             // set mode
             track = true
+            // pan to cur location
+            map.panTo(curPos)
+            // zoom
+            setTimeout(() => {
+                // zooming...
+                map.setZoom(19)
+                // re panTo
+                map.panTo(curPos)
+            }, 1000)
             // set btn enabled
             document.getElementById("trackBtn").style.color = "skyblue"
         }
@@ -281,8 +291,10 @@
         circle.setCenter(curPos)
         // update global acc variable for accuracy circle
         accAl = acc
-        // update my info window
+        // set myInfo
         content = getSpeed(pos)+" km/h";
+        document.getElementById("myInfo").innerHTML = content
+        // update my info window
         if ($.cookie("usrInI")) {
             myIW.setContent($.cookie('usrInI').split("|")[0]+" | "+speeds+" km/h")
         }

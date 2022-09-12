@@ -40,6 +40,7 @@
     let curPos
     let gLat
     let gLon
+    let focus
     let accAl = 0
     let radius = 0
     let interval = null
@@ -229,7 +230,28 @@
                     // make new marker
                     result.forEach((e) => {
                         // simplize (?)
-                        pos = {lat: parseFloat(e['location'].split("^|^")[0]), lng: parseFloat(e['location'].split("^|^")[1])}
+                        let pos = {lat: parseFloat(e['location'].split("^|^")[0]), lng: parseFloat(e['location'].split("^|^")[1])}
+
+                        let contentIw = e['name']+" | "+e['speed']+"km/h"
+
+                        // if marker focused, get distence and show it
+                        if (focus === e['id']) {
+                            // get distence
+                            let dist = getDist(gLat, gLon, pos['lat'], pos['lon']);
+                            const myPosToMk = [
+                                {lat: gLat, lng: gLon},
+                                pos
+                            ];
+                            const connecter = new google.maps.Polyline({
+                                path: myPosToMk,
+                                geodesic: true,
+                                strokeColor: "#FF0000",
+                                strokeOpacity: 1.0,
+                                strokeWeight: 2,
+                            });
+                            connecter.setMap(map)
+                            contentIw = e['name']+" | "+e['speed']+"km/h<br>distence: "+dist
+                        }
 
                         // set marker img. filled with blue. my marker is filled with red
                         const svgMarker = {
@@ -249,13 +271,18 @@
                             shouldFocus: false,
                             disableAutoPan: true,
                         });
-
+                        // put id into usrMk
+                        usrMk.usrId = e['id']
+                        usrMk.addListener("click", () => {
+                            // when click, set focus to usrId
+                            focus = usrMk.usrId
+                        })
                         // add marker to array
                         markers.push(usrMk)
 
                         // init info window
                         usrIW = new google.maps.InfoWindow({
-                            content: e['name']+" | "+e['speed']+"km/h",
+                            content: contentIw,
                             disableAutoPan: true,
                         });
 
@@ -392,8 +419,8 @@
         return heading
     }
 
-    // calculate speed by times and locations
-    function calculateSpeed(t1, lat1, lon1, t2, lat2, lon2) {
+    // calculate distence
+    function getDist(lat1, lon1, lat2, lon2) {
         // ???
         var R = 6371;
         var dLat = deg2rad(lat2-lat1);
@@ -404,8 +431,12 @@
             Math.sin(dLon/2) * Math.sin(dLon/2)
         ;
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        var d = R * c; // Distance in km
-        return ((d/((t2-t1)/1000))*60*60).toFixed(2);
+        return R * c; // Distance in km
+    }
+
+    // calculate speed by times and locations
+    function calculateSpeed(t1, lat1, lon1, t2, lat2, lon2) {
+        return ((getDist(lat1, lon1, lat2, lon2)/((t2-t1)/1000))*60*60).toFixed(2);
     }
 
     // ???

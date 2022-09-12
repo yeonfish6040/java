@@ -19,8 +19,8 @@ public class mapUpdate extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         PrintWriter out = response.getWriter();
-        if (request.getRemoteHost().equals("133.186.213.35") == false)
-            return;
+//        if (request.getRemoteHost().equals("133.186.213.35") == false)
+//            return;
         sqlQuery sq = new sqlQuery("lyj.kr", "3306", "java", "java", "java");
         if (!sq.cStatus()) {
             System.out.println("DB connection error");

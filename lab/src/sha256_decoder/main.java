@@ -18,28 +18,27 @@ public class main {
         int i = sc.nextInt();
         Boolean go = false;
         Stopwatch.Flag();
+        Scanner scF = new Scanner(new File("shaKeys.db"));
+        String StartStr = "";
+        while (scF.hasNextLine()) {
+            StartStr = scF.nextLine();
+        }
+        System.out.println(StartStr);
+        StartStr = StartStr.split("!=!")[0];
+        System.out.println(StartStr);
+        String strTemp = StartStr;
         while(true) {
-            Scanner scF = new Scanner(new File("shaKeys.db"));
-            String StartStr = "";
-            while (scF.hasNextLine()) {
-                StartStr = scF.nextLine();
-            }
-            System.out.println(StartStr);
-            StartStr = StartStr.split("!=!")[0];
-            System.out.println(StartStr);
             String[] strList = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "[", "}", "]", "|", "\\", ":", ";", "\'", "\"", ",", "<", ".", ">", "/", "?", " "};
             StringBuffer lines = new StringBuffer();
-            String strTemp = StartStr;
             int step;
-            if(i>10000000){
-                step = 10000000;
-                i -= 10000000;
+            if(i>1000000){
+                step = 1000000;
+                i -= 1000000;
             }else {
                 step = i;
                 i = 0;
                 go = true;
             }
-            Stopwatch.Flag();
             while(true) {
                 System.out.println(i+step);
                 strTemp = strIncrease(strTemp, strList);
@@ -54,7 +53,6 @@ public class main {
                 if (step == 0)
                     break;
             }
-            Stopwatch.Flag();
             FileWriter fr = new FileWriter("shaKeys.db", true);
             fr.write(lines.toString());
             fr.close();
@@ -63,10 +61,7 @@ public class main {
             }
         }
         Stopwatch.Flag();
-        System.out.println(Stopwatch.getDuration(0,3)+"ms was taken for this work");
-        System.out.println(Stopwatch.getDuration(0,1)+"ms was taken for read db file");
-        System.out.println(Stopwatch.getDuration(1,2)+"ms was taken for making");
-        System.out.println(Stopwatch.getDuration(2, 3)+"ms was taken for saving result");
+        System.out.println(Stopwatch.getDuration(0,1)+"ms was taken for this work");
     }
 
     private static String strIncrease(String str, String[] strList) {

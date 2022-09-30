@@ -16,14 +16,8 @@ import java.time.Instant;
 
 @WebServlet("/mapUpdate")
 public class mapUpdate extends HttpServlet {
-    sqlQuery sq;
+    sqlQuery sq = new sqlQuery("lyj.kr", "3306", "java", "java", "java");
 
-    mapUpdate() {
-        this.sq = new sqlQuery("lyj.kr", "3306", "java", "java", "java");
-        if (!sq.cStatus()) {
-            System.out.println("DB connection error");
-        }
-    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {

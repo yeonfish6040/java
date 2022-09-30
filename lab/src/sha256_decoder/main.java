@@ -18,17 +18,17 @@ public class main {
         int i = sc.nextInt();
         Boolean go = false;
         Stopwatch.Flag();
-        Scanner scF = new Scanner(new File("shaKeys.db"));
+        Scanner scF = new Scanner(new File("shaKeys.csv"));
         String StartStr = "";
         while (scF.hasNextLine()) {
             StartStr = scF.nextLine();
         }
         System.out.println(StartStr);
-        StartStr = StartStr.split("!=!")[0];
+        StartStr = StartStr.split(",")[0];
         System.out.println(StartStr);
         String strTemp = StartStr;
         while(true) {
-            String[] strList = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "[", "}", "]", "|", "\\", ":", ";", "\'", "\"", ",", "<", ".", ">", "/", "?", " "};
+            String[] strList = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "`", "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "{", "[", "}", "]", "|", ":", ";", ",", "<", ".", ">", "/", "?", " "};
             StringBuffer lines = new StringBuffer();
             int step;
             if(i>1000000){
@@ -42,10 +42,10 @@ public class main {
             while(true) {
                 System.out.println(i+step);
                 strTemp = strIncrease(strTemp, strList);
-                if (strTemp.equals("!=!"))
+                if (strTemp.equals(","))
                     continue;
                 try{
-                    String line = strTemp+"!=!"+SHA256.encrypt(strTemp)+"\n";
+                    String line = "\""+strTemp+"\","+SHA256.encrypt(strTemp)+"\n";
                     lines.append(line);
                 }catch (Exception e){
                 }
@@ -53,7 +53,7 @@ public class main {
                 if (step == 0)
                     break;
             }
-            FileWriter fr = new FileWriter("shaKeys.db", true);
+            FileWriter fr = new FileWriter("shaKeys.csv", true);
             fr.write(lines.toString());
             fr.close();
             if(go) {

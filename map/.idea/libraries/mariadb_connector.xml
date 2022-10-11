@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="mariadb_connector">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../exlib/mariadb_connector.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

@@ -6,9 +6,9 @@
 <head>
     <title>Map</title>
     <meta charset="utf-8">
-    <script src="./src/jquery.min.js"></script>
-    <script src="./src/jquery.cookie.js"></script>
-    <meta name="google-site-verification" content="Mro3-_R8_cq0Kk3iQpJkFx5GYqPnGzT0EhlQC-LylTY" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.cookie.js"></script>
+    <%--    <meta name="google-site-verification" content="Mro3-_R8_cq0Kk3iQpJkFx5GYqPnGzT0EhlQC-LylTY" />--%>
 </head>
 <body>
 <!-- speed -->

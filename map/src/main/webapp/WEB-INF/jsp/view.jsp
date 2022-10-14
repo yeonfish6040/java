@@ -6,8 +6,8 @@
 <head>
     <title>Map</title>
     <meta charset="utf-8">
-    <script src="js/jquery.min.js"></script>
-    <script src="js/jquery.cookie.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/jquery.cookie.js"></script>
     <%--    <meta name="google-site-verification" content="Mro3-_R8_cq0Kk3iQpJkFx5GYqPnGzT0EhlQC-LylTY" />--%>
 </head>
 <body>
@@ -50,6 +50,7 @@
     let track = false
     let isChanging = false
     let watch = true
+    let group = "${group}";
     let markers = []
     let iWindows = []
     let usrInfo = []
@@ -199,8 +200,6 @@
     function updateOther() {
         // check user logined
         if($.cookie("usrInI")) {
-            // get param 'group'
-            let group = "<%=request.getParameter("group")%>"
             // if group isn't null
             if (group !== "null") {
                 // get user info array from cookie
@@ -208,7 +207,7 @@
                 // start ajax
                 var rq = new XMLHttpRequest();
                 // send name, id, location, heading, speed, group
-                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+usrInfo[0]+"&location="+gLat+"^|^"+gLon+"&heading="+heading+"&speed="+speeds);
+                rq.open("GET", "./mapUpdate?id="+usrInfo[2]+"&group="+group+"&name="+encodeURIComponent(usrInfo[0])+"&location="+gLat+encodeURIComponent("^|^")+gLon+"&heading="+heading+"&speed="+speeds);
                 // send
                 rq.send()
                 // on ajax action finished

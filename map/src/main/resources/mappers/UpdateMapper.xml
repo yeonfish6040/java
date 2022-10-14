@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.lyj_web.map.mappers.UpdateMapper">
-    <delete id="deleteExpired">
-        delete from loc_Live where last_update+600 &lt; #{time}
+    <select id="getList" resultType="LocVO">
+        select * from locLive
+    </select>
+    <delete id="deleteExpired" parameterType="com.lyj_web.map.DTO.LocDTO">
+        delete from locLive where last_update+600 &lt; (select UNIX_TIMESTAMP()) or id like #{id}
     </delete>
     <insert id="insert" parameterType="com.lyj_web.map.DTO.LocDTO">
-        insert into loc_Live(`last_update`, `id`, `name`, `location`, `group`, `heading`, `speed`) values((SELECT UNIX_TIMESTAMP()), #{id}, #{name}, #{location}, #{group}, #{heading}, #{speed});
+        insert into locLive(`last_update`, `id`, `name`, `location`, `group`, `heading`, `speed`) values((SELECT UNIX_TIMESTAMP()), #{id}, #{name}, #{location}, #{group}, #{heading}, #{speed});
     </insert>
-    <select id="select" parameterType="com.lyj_web.map.DTO.LocDTO" resultType="LocVo">
+    <select id="select" parameterType="com.lyj_web.map.DTO.LocDTO" resultType="LocVO">
         select * from locLive where id not like #{id} and `group` like #{group}
     </select>
-    <update id="update" parameterType="com.lyj_web.map.DTO.LocDTO">
-
-    </update>
+    <select id="check" parameterType="String" resultType="String">
+        select * from `check` where code like #{code}
+    </select>
 </mapper>

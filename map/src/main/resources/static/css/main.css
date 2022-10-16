@@ -1,12 +1,35 @@
 .container {
     position: absolute;
+
+}
+
+.backgroundImg {
+    position: absolute;
+    background-image: url("/img/main.png");
+    z-index: -2;
+}
+
+.full {
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    text-align: center;
 }
 
-.subject {
+.description {
+    position: relative;
+    width: 0%;
+    height: fit-content;
+    overflow: hidden;
+    font-size: 0.5em;
+    white-space:nowrap;
+    margin: auto;
+}
+
+.animation_down-appear  {
+    position: absolute;
+    top: -5vh;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-size: 3em;
 }

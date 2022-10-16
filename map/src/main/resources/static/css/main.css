@@ -26,6 +26,21 @@
     margin: auto;
 }
 
+.start {
+    position: absolute;
+    top: 12vh;
+    left: 50%;
+    width: 5vw;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+    white-space:nowrap;
+}
+
+.start span {
+    display: inline-block;
+    transform: translateX(-100px);
+}
+
 .animation_down-appear  {
     position: absolute;
     top: -5vh;

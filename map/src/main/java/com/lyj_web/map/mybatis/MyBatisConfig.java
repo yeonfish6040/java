@@ -31,7 +31,8 @@ public class MyBatisConfig {
      */
 
     @Bean
-    @ConfigurationProperties(prefix = "spring.datasource.hikari") // 상위경로 고정
+    @ConfigurationProperties(prefix = "spring.datasource.hikari.plain") // 상위경로 고정
+//    @ConfigurationProperties(prefix = "spring.datasource.hikari.log4jdbc") // 상위경로 고정
     public HikariConfig hikariConfig() { return new HikariConfig(); } // application.properties에 작성된 JDBC datasource 정보 설정
 
     @Bean

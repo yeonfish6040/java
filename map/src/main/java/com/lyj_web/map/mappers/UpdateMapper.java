@@ -12,7 +12,7 @@ import java.util.List;
 public interface UpdateMapper {
 
     public List<LocVO> getList();
-    public void deleteExpired(LocDTO dto);
+    public int deleteExpired(LocDTO dto);
     public int insert(LocDTO dto);
     public List<LocVO> select(LocDTO dto);
 

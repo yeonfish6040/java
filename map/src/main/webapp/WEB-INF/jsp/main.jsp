@@ -9,10 +9,13 @@
 <html>
 <head>
     <title>map</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/jquery.min.js"></script>
 </head>
 <body>
     <div class="container">
-
+        <div class="animation_down-appear subject" id="subject">Map에 오신것을 환영합니다.</div>
     </div>
 </body>
+<script src="/js/main.js"></script>
 </html>

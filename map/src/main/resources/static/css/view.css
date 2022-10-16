@@ -1,0 +1,35 @@
+#myInfo {
+    position: absolute;
+    top: 10vh;
+    font-size: 1.5em;
+}
+
+#updateBtn {
+    position: absolute;
+    bottom: 15vh;
+    width: 4vh;
+    height: 4vh;
+}
+
+#watchBtn {
+    position: absolute;
+    bottom: 10vh;
+    width: 4vh;
+    height: 4vh;
+}
+
+#trackBtn {
+    position: absolute;
+    bottom: 5vh;
+    width: 4vh;
+    height: 4vh;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+}

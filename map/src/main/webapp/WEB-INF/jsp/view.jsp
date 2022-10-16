@@ -8,26 +8,19 @@
     <meta charset="utf-8">
     <script src="/js/jquery.min.js"></script>
     <script src="/js/jquery.cookie.js"></script>
-    <%--    <meta name="google-site-verification" content="Mro3-_R8_cq0Kk3iQpJkFx5GYqPnGzT0EhlQC-LylTY" />--%>
+    <link rel="stylesheet" href="/css/view.css">
 </head>
 <body>
 <!-- speed -->
-<h3><span id="myInfo" style="position: absolute; top: 10vh; font-size: 1.5em;"></span></h3>
-<!-- google login function -->
-<span id="loginArea"><span data-client_id='549662034486-gsi7aqabhmdrp5a0b09dtmi6g9hjl8b0.apps.googleusercontent.com' data-callback='onSignIn' id='g_id_onload'></span></span>
+<h3><span id="myInfo"></span></h3>
 <!-- update type or toggle btns -->
-<button style="position: absolute; bottom: 15vh;width: 4vh; height: 4vh;" id="updateBtn" onclick="toggleUpdate()">RE</button>
-<button style="position: absolute; bottom: 10vh;width: 4vh; height: 4vh;" id="watchBtn" onclick="switchWatch()">DM</button>
-<button style="position: absolute; bottom: 5vh;width: 4vh; height: 4vh;" id="trackBtn" onclick="toggleTrack()">⊙</button>
-<div id="map" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0;z-index: -1;"></div>
+<button id="updateBtn" onclick="toggleUpdate()">RE</button>
+<button id="watchBtn" onclick="switchWatch()">DM</button>
+<button id="trackBtn" onclick="toggleTrack()">⊙</button>
+<div id="map"></div>
 </body>
-<script>
-    // if already logined, disable login prompt
-    if($.cookie("usrInI"))
-        document.getElementById("loginArea").innerHTML = ""
-</script>
+</html>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAqOsjFu-Up_Q5VAvMJmzCGFPHiLFA3AzI&callback=initMap"></script>
-<script src='https://accounts.google.com/gsi/client' async defer ></script>
 <script>
     // define global variables
     let map
@@ -50,7 +43,7 @@
     let track = false
     let isChanging = false
     let watch = true
-    let group = "${group}";
+    let group = "${group}"
     let markers = []
     let iWindows = []
     let usrInfo = []
@@ -84,7 +77,7 @@
 
             // define main marker
             curPosMk = new google.maps.Marker({
-                position: {lat: lat, lng: lon},
+                // position: {lat: lat, lng: lon},
                 icon: svgMarker,
                 map: map,
                 disableAutoPan: true
@@ -374,26 +367,6 @@
         }, 100);
         // set status - stopped
         isChanging = false
-    }
-
-    // on user login
-    function onSignIn(res) {
-        // start ajax
-        rq = new XMLHttpRequest();
-        // send token and client id to node js api server. (used to get user info)
-        rq.open("GET", "https://lyj.kr:6040/?cre="+res.credential+"&cid="+res.clientId)
-        // execute
-        rq.send()
-        // on finish
-        rq.onload = () => {
-            // parsing json string
-            re = JSON.parse(rq.responseText)
-            // set cookie
-            $.cookie('usrInI', (re['name']+"|"+re['picture']+"|"+re['sub']+"|"+re['email_verified']), { expires: 7 });
-            // init info window function initMyIW
-            initMyIW()
-        }
-
     }
 
     // set info window for me
